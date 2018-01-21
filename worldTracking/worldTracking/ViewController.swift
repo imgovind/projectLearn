@@ -40,21 +40,33 @@ class ViewController: UIViewController {
     func addMultipleRelativeNodes() {
         let pyramid = getShape(inputNumber: 4)
         pyramid.geometry?.firstMaterial?.specular.contents = UIColor.orange
-        pyramid.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-        pyramid.position = SCNVector3(0.1, 0.1, -0.1)
+        pyramid.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+        pyramid.position = SCNVector3(0.2, 0.2, 0.2)
         
+        let box = getShape(inputNumber: 0)
+        box.geometry?.firstMaterial?.specular.contents = UIColor.orange
+        box.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+        box.position = SCNVector3(0.0, -0.05, 0.0)
+        
+        let door = SCNNode(geometry: SCNPlane(width: 0.03, height: 0.06))
+        door.geometry?.firstMaterial?.specular.contents = UIColor.white
+        door.geometry?.firstMaterial?.diffuse.contents = UIColor.brown
+        door.position = SCNVector3(0, -0.02, 0.051)
+
         let cylinder = getShape(inputNumber: 3)
         cylinder.geometry?.firstMaterial?.specular.contents = UIColor.yellow
         cylinder.geometry?.firstMaterial?.diffuse.contents = UIColor.red
-        cylinder.position = SCNVector3(0.3, 0.0, -0.0)
+        cylinder.position = SCNVector3(0.2, 0.0, 0.0)
         
         let cone = getShape(inputNumber: 2)
         cone.geometry?.firstMaterial?.specular.contents = UIColor.red
         cone.geometry?.firstMaterial?.diffuse.contents = UIColor.yellow
-        cone.position = SCNVector3(0.0, 0.1, -0.0)
+        cone.position = SCNVector3(0.0, 0.1, 0.0)
         
         cylinder.addChildNode(cone)
         pyramid.addChildNode(cylinder)
+        box.addChildNode(door)
+        pyramid.addChildNode(box)
         
         self.sceneView.scene.rootNode.addChildNode(pyramid)
     }
@@ -86,11 +98,11 @@ class ViewController: UIViewController {
     
     func getShape(inputNumber: Int? = nil) -> SCNNode {
         let node = SCNNode()
-        let box = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0.025)
+        let box = SCNBox(width: 0.1, height: 0.1, length: 0.1, chamferRadius: 0)
         let circle = SCNSphere(radius: 0.05)
         let cone = SCNCone(topRadius: 0, bottomRadius: 0.05, height: 0.1)
         let cylinder = SCNCylinder(radius: 0.05, height: 0.1)
-        let pyramid = SCNPyramid(width: 0.05, height: 0.05, length: 0.1)
+        let pyramid = SCNPyramid(width: 0.1, height: 0.1, length: 0.1)
         let capsule = SCNCapsule(capRadius: 0.05, height: 0.1)
         let tube = SCNTube(innerRadius: 0.025, outerRadius: 0.05, height: 0.1)
         let torus = SCNTorus(ringRadius: 0.1, pipeRadius: 0.025)
