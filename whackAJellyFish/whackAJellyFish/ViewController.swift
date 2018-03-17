@@ -8,9 +8,14 @@
 
 import UIKit
 import ARKit
+import Each
 
 class ViewController: UIViewController {
 
+    var timer = Each(1).seconds
+    var countdown = 10
+    
+    @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var play: UIButton!
     @IBOutlet weak var SceneView: ARSCNView!
     let configuration = ARWorldTrackingConfiguration()
@@ -29,13 +34,18 @@ class ViewController: UIViewController {
     }
 
     @IBAction func play(_ sender: Any) {
+        self.setTimer()
         self.addNode()
         self.play.isEnabled = false
     }
     
     @IBAction func reset(_ sender: Any) {
-        self.SceneView.scene.rootNode.enumerateChildNodes{ (node, stop) in node.removeFromParentNode() }
+        self.timer.stop()
+        self.restoreTimer()
         self.play.isEnabled = true
+        self.SceneView.scene.rootNode.enumerateChildNodes { (node, _) in
+            node.removeFromParentNode()
+        }
     }
     
     func addOldNode() {
@@ -59,23 +69,24 @@ class ViewController: UIViewController {
         if(hitTest.isEmpty) {
             print("Didn't touch the box")
         } else {
-            let results = hitTest.first!
-//            let geometry = results.node.geometry
-//            print(geometry)
-            let currentNode = results.node
-            if currentNode.animationKeys.isEmpty {
-                SCNTransaction.begin()
-                self.animateNode(node: currentNode)
-                SCNTransaction.completionBlock = {
-                    currentNode.removeFromParentNode()
-                    self.addNode()
+            if countdown > 0 {
+                let results = hitTest.first!
+                let currentNode = results.node
+                if currentNode.animationKeys.isEmpty {
+                    SCNTransaction.begin()
+                    self.animateNode(node: currentNode)
+                    SCNTransaction.completionBlock = {
+                        currentNode.removeFromParentNode()
+                        self.addNode()
+                        self.restoreTimer()
+                    }
+                    SCNTransaction.commit()
                 }
-                SCNTransaction.commit()
             }
         }
     }
     
-    func animateNode(node: SCNNode){
+    func animateNode(node: SCNNode) {
         let spin = CABasicAnimation(keyPath: "position")
         spin.fromValue = node.presentation.position
         spin.toValue = SCNVector3(node.presentation.position.x - 0.2, node.presentation.position.y - 0.2, node.presentation.position.z - 0.2)
@@ -83,6 +94,23 @@ class ViewController: UIViewController {
         spin.autoreverses = true
         spin.repeatCount = 5
         node.addAnimation(spin, forKey: "position")
+    }
+    
+    func setTimer() {
+        self.timer.perform { () -> NextStep in
+            self.countdown -= 1
+            self.timerLabel.text = String(self.countdown)
+            if (self.countdown == 0) {
+                self.timerLabel.text = "You Lose!"
+                return .stop
+            }
+            return .continue
+        }
+    }
+    
+    func restoreTimer() {
+        self.countdown = 10
+        self.timerLabel.text = String(self.countdown)
     }
     
     func randomNumbers(start: CGFloat, end: CGFloat) -> CGFloat {
